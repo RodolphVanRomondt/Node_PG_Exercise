@@ -1,0 +1,16 @@
+{
+  "name": "express-biztime",
+  "version": "1.0.0",
+  "description": "Building a REST-ful backend API server for a simple company/invoice tracker",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "RodolphVanRomondt",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.1",
+    "pg": "^8.11.3"
+  }
+}
