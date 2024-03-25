@@ -1,12 +1,12 @@
 /* Routes for the companies. */
 
 const express = require("express");
-const router = express.Router();
+const routerCompanies = express.Router();
 const ExpressError = require("../expressError");
 const db = require("../db");
 
 
-router.get("/", async (req, res, next) => {
+routerCompanies.get("/", async (req, res, next) => {
     try {
         const result = await db.query(`SELECT * FROM companies`);
         const codeName = result.rows.map(({ code, name }) => ({ code, name }));
@@ -16,7 +16,7 @@ router.get("/", async (req, res, next) => {
     }
 });
 
-router.get("/:code", async (req, res, next) => {
+routerCompanies.get("/:code", async (req, res, next) => {
     try {
         const code = req.params.code;
         const result = await db.query(`SELECT * FROM companies WHERE code=$1`, [code]);
@@ -25,13 +25,21 @@ router.get("/:code", async (req, res, next) => {
             throw new ExpressError(`Company With Code ${code} Not Found!`, 404);
         }
 
-        return res.json({company: result.rows[0]});
+        const invoices = await db.query(
+            `SELECT * FROM invoices WHERE comp_code=$1`,
+            [code]
+        );
+
+        return res.json({
+            company: result.rows[0],
+            invoices: invoices.rows.map(({ id, amt, paid, add_date, paid_date }) => ({ id, amt, paid, add_date, paid_date }))
+        });
     } catch (e) {
         return next(e);
     }
 });
 
-router.post("/", async (req, res, next) => {
+routerCompanies.post("/", async (req, res, next) => {
     try {
         const company = req.body;
 
@@ -56,7 +64,7 @@ router.post("/", async (req, res, next) => {
     }
 });
 
-router.put("/:code", async (req, res, next) => {
+routerCompanies.put("/:code", async (req, res, next) => {
     const company = req.body;
     const code = req.params.code;
     try {
@@ -79,7 +87,7 @@ router.put("/:code", async (req, res, next) => {
     }
 });
 
-router.delete("/:code", async (req, res, next) => {
+routerCompanies.delete("/:code", async (req, res, next) => {
     const code = req.params.code;
 
     try {
@@ -100,4 +108,4 @@ router.delete("/:code", async (req, res, next) => {
 });
 
 
-module.exports = router;
+module.exports = routerCompanies;
