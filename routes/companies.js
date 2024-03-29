@@ -58,7 +58,7 @@ routerCompanies.post("/", async (req, res, next) => {
             VALUES($1, $2, $3) RETURNING code, name, description`,
             [company.code, company.name, company.description]);
 
-        return res.json({company: result.rows[0]});
+        return res.status(201).json({company: result.rows[0]});
     } catch (e) {
         return next(e);
     }
