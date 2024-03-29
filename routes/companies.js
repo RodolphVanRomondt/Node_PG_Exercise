@@ -4,12 +4,14 @@ const express = require("express");
 const routerCompanies = express.Router();
 const ExpressError = require("../expressError");
 const db = require("../db");
+const slugify = require("slugify");
 
 
 routerCompanies.get("/", async (req, res, next) => {
     try {
         const result = await db.query(`SELECT * FROM companies`);
         const codeName = result.rows.map(({ code, name }) => ({ code, name }));
+
         return res.json({companies: codeName});
     } catch (e) {
         return next(e);
@@ -43,20 +45,22 @@ routerCompanies.post("/", async (req, res, next) => {
     try {
         const company = req.body;
 
-        if (!company.code || !company.name || !company.description) {
+        if (!company.name || !company.description) {
             throw new ExpressError("Bad Request", 400);
         }
 
-        const toCheck = await db.query(`SELECT * FROM companies WHERE code=$1`, [company.code]);
+        const code = slugify(company.name.toLowerCase(), { strict: true, remove: /[aeiouy]/gi });
+
+        const toCheck = await db.query(`SELECT * FROM companies WHERE code=$1`, [code]);
 
         if (toCheck.rows.length) {
-            throw new ExpressError(`Company with code ${company.code} already exist!`, 409);
+            throw new ExpressError(`Company with code ${code} already exist!`, 409);
         }
 
         const result = await db.query(
             `INSERT INTO companies (code, name, description)
             VALUES($1, $2, $3) RETURNING code, name, description`,
-            [company.code, company.name, company.description]);
+            [code, company.name, company.description]);
 
         return res.status(201).json({company: result.rows[0]});
     } catch (e) {
