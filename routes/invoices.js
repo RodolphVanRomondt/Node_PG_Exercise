@@ -19,7 +19,7 @@ routerInvoices.get("/", async (req, res, next) => {
 });
 
 routerInvoices.get("/:id", async (req, res, next) => {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
 
     try {
 
@@ -32,7 +32,7 @@ routerInvoices.get("/:id", async (req, res, next) => {
         const { amt, paid, add_date, paid_date, comp_code } = result.rows[0]
         const company = await db.query(`SELECT *  FROM companies WHERE code=$1`, [comp_code]);
 
-        return res.json({ invoices: {id, amt, paid, add_date, paid_date, company: company.rows[0]} });
+        return res.json({ invoice: {id, amt, paid, add_date, paid_date, company: company.rows[0]} });
 
     } catch (e) {
         return next(e);
@@ -58,7 +58,7 @@ routerInvoices.post("/", async (req, res, next) => {
             [data.comp_code, data.amt]
         );
 
-        return res.json({invoice: result.rows[0]});
+        return res.status(201).json({invoice: result.rows[0]});
 
 
     } catch (e) {
@@ -99,7 +99,7 @@ routerInvoices.delete("/:id", async (req, res, next) => {
         );
 
         if (!result.rows.length) {
-            throw new ExpressError(`Company With Code ${req.params.id} Can't Be Found.`, 404);
+            throw new ExpressError(`Invoice With ID ${req.params.id} Can't Be Found.`, 404);
         }
 
         return res.json({ status: "deleted" });
