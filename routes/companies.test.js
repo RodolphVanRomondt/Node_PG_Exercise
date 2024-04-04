@@ -31,14 +31,13 @@ describe("POST /companies", function () {
         const response = await request(app)
             .post(`/companies`)
             .send({
-                code: "tsla",
                 name: "Tesla",
                 description: "Accelerating the World's Transition to Sustainable Energy"
             });
         expect(response.statusCode).toEqual(201);
         expect(response.body).toEqual({
             company: {
-                code: "tsla",
+                code: "tsl",
                 name: "Tesla",
                 description: "Accelerating the World's Transition to Sustainable Energy"
             }
@@ -48,7 +47,6 @@ describe("POST /companies", function () {
     test("Can't create new company. Missing Key", async function () {
         const response = await request(app).post(`/companies`)
             .send({
-                code: "amzn",
                 name: "Amazon"
             });
         expect(response.statusCode).toEqual(400);
